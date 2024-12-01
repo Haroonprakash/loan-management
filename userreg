@@ -1,1 +1,152 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package DB;
+
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetAddress;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
+ 
+/**
+ 
+/**
+ *
+ * @author welcome
+ */
+@WebServlet("/userreeg")
+@MultipartConfig(maxFileSize = 16177215)    // upload file's size up to 16MB
+public class userreeg extends HttpServlet {
+    private int length;
+     
+    // database connection settings
+  
+     
+    protected void doPost(HttpServletRequest request,
+            HttpServletResponse response) throws ServletException, IOException {
+                   
+        HttpSession session = request.getSession(true);
+         String sup = "supplier1";
+        
+           
+       //String lid="454545";
+    String username = request.getParameter("username");
+    String useremail = request.getParameter("useremail");
+    String password = request.getParameter("password");
+    String gender = request.getParameter("gender");
+    String author = request.getParameter("authornumber");
+     String phone = request.getParameter("phone");
+    String location = request.getParameter("location");
+     Random skey = new SecureRandom();
+                int skeyl = 6;
+                String auto = "1234567890";
+                String key1 = "";
+                for (int i = 0; i < skeyl; i++) {
+                    int index = (int) (skey.nextDouble() * auto.length());
+                    key1 += auto.substring(index, index + 1);
+                }
+     String Customerid = key1;
+    
+    String status = "NotApproved";
+    String status1 = "allocated";
+    String status2 = "date";
+    
+	                        
+InputStream inputStream = null;
+
+Part filePart = request.getPart("profile");
+if (filePart != null) {
+
+    System.out.println(filePart.getName());
+    System.out.println(filePart.getSize());
+    System.out.println(filePart.getContentType());
+
+    inputStream = filePart.getInputStream();
+}
+ 
+Connection con = Dbconnection.getConnection();
+                    try {
+                        Statement st3 = con.createStatement();
+                    } catch (SQLException ex) {
+                        Logger.getLogger(userreeg.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+  
+
+ 
+try {
+
+           
+    
+     int i =3;
+if (i>=1){
+
+    
+        String sql = "Insert into user_reg(username,mailid,password,gender,phone,location,author,profiles1,statuss,customer_id) values (?,?,?,?,?,?,?,?,?,?)";
+    PreparedStatement statement = con.prepareStatement(sql);
+   
+    
+    statement.setString(1, username);
+    statement.setString(2, useremail);
+    statement.setString(3, password);
+    statement.setString(4,gender);
+     statement.setString(5, phone);
+    statement.setString(6,location);
+    statement.setString(7, author);
+    statement.setString(9, status);
+     statement.setString(10, Customerid);
+    
+    
+    
+         
+    if (inputStream != null) {
+        statement.setBlob(8, inputStream);
+    }
+    // key generation start
+    //ey generation end
+    int row = statement.executeUpdate();
+    if (row > 0) {
+        
+         response.sendRedirect("UserLogin.jsp?umsggsuc=userregister");
+        
+        
+    }
+    else{
+       response.sendRedirect("UserLogin.jsp?wumsgg=failed");
+                
+       
+        
+    }
+}
+        
+} catch (SQLException ex) {
+    ex.printStackTrace();
+}
+    }
+    
+    }
 
